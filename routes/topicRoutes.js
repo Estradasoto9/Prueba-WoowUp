@@ -1,13 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const TopicController = require('../controllers/topicController');
+const topicController = require('../controllers/topicController');
 
-const controller = new TopicController();
+router.post('/create', (req, res) => {topicController.createTopic(req, res); // register new topic
+});
 
-// Register topic
-router.post('/add', (req, res) => controller.registerTopic(req, res));
-
-// Get active alerts for a topic
-router.get('/:topicId/active-alerts', (req, res) => controller.getActiveAlertsForTopic(req, res));
+router.get('/:id', (req, res) => {topicController.getTopic(req, res); // get topics by id
+});
 
 module.exports = router;

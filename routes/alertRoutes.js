@@ -1,10 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const AlertController = require('../controllers/alertController');
+const alertController = require('../controllers/alertController');
 
-const controller = new AlertController();
+router.post('/createAlert', (req, res) => {alertController.createAlert(req, res); // create and send alerts
+});
 
-// send alert
-router.post('/send', (req, res) => controller.sendAlert(req, res));
+router.get('/user/:userId', (req, res) => {alertController.getAlertsForUser(req, res); // get user alerts by id
+});
+
+router.get('/topic/:topicId', (req, res) => {alertController.getAlertsForTopic(req, res); // get topical alerts by id
+});
 
 module.exports = router;

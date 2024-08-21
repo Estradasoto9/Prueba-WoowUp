@@ -1,22 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const UserController = require('../controllers/userController');
+const userController = require('../controllers/userController');
 
-const controller = new UserController();
+router.post('/register', (req, res) => {userController.createUser(req, res); // register new user
+});
 
-// Register user
-router.post('/add', (req, res) => controller.registerUser(req, res));
+router.post('/subscribe', (req, res) => {userController.subscribeToTopic(req, res); // subscribe to a new topic
+});
 
-// Subscribe user to topic
-router.post('/:userId/subscribe', (req, res) => controller.subscribeUserToTopic(req, res));
+router.post('/unsubscribe', (req, res) => {userController.unsubscribeFromTopic(req, res); // unsubscribe to a topic
+});
 
-// Unsubscribe user from topic
-router.post('/:userId/unsubscribe', (req, res) => controller.unsubscribeUserFromTopic(req, res));
+router.post('/markAlertAsRead', (req, res) => {userController.markAlertAsRead(req, res); // mark alert as read
+});
 
-// Mark alert as read
-router.post('/:userId/alerts/:alertId/read', (req, res) => controller.markAlertAsRead(req, res));
-
-// Get unread alerts from a user
-router.get('/:userId/unread-alerts', (req, res) => controller.getUnreadAlertsForUser(req, res));
+router.get('/alerts/:userId', (req, res) => {userController.getUnreadAlerts(req, res); // get all unread alerts
+});
 
 module.exports = router;
