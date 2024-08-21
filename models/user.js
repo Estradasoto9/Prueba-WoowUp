@@ -3,37 +3,31 @@ class User {
         this.id = id;
         this.name = name;
         this.subscribedTopics = new Set();
-        this.alerts = [];
+        this.alerts = []; // list of alerts
     }
 
-    subscribeToTopic(topic) {
-        this.subscribedTopics.add(topic);
+    subscribeToTopic(topicId) {
+        this.subscribedTopics.add(topicId);
     }
 
-    unsubscribeFromTopic(topic) {
-        this.subscribedTopics.delete(topic);
+    unsubscribeFromTopic(topicId) {
+        this.subscribedTopics.delete(topicId);
     }
 
     receiveAlert(alert) {
-        if (!alert.hasOwnProperty('id') || !alert.hasOwnProperty('expiryDate')) {
-            throw new Error('Invalid alert object');
-        }
-        alert.read = alert.read || false;
         this.alerts.push(alert);
     }
 
     markAlertAsRead(alertId) {
         const alert = this.alerts.find(alert => alert.id === alertId);
-        if (alert) {
-            alert.read = true;
-        } else {
-            throw new Error('Alert not found');
-        }
+        if (alert) alert.read = true;
     }
 
     getUnreadAlerts() {
         const now = new Date();
-        return this.alerts.filter(alert => !alert.read && alert.expiryDate > now);
+        return this.alerts
+            .filter(alert => !alert.read && alert.expirationDate > now)
+            .sort((a, b) => a.type === 'Urgent' ? -1 : (b.type === 'Urgent' ? 1 : 0));
     }
 }
 
