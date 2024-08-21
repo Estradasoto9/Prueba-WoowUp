@@ -1,76 +1,31 @@
-const User = require('../models/user');
-const Topic = require('../models/topic');
-const { InformativeAlert, UrgentAlert } = require('../models/alert');
+const alertService = require('../services/alertService');
 
 class AlertController {
-    constructor() {
-        this.users = new Map();
-        this.topics = new Map();
-    }
-
-    registerUser(id, name) {
-        if (!this.users.has(id)) {
-            const user = new User(id, name);
-            this.users.set(id, user);
+    createAlert(req, res) {
+        try {
+            const { id, type, message, topicId, userId, expirationDate } = req.body;
+            if (userId) {
+                alertService.createAlertForUser(id, type, message, topicId, userId, new Date(expirationDate));
+            } else {
+                alertService.createAlertForTopic(id, type, message, topicId, new Date(expirationDate));
+            }
+            res.json({ message: 'Alert created and sent' });
+        } catch (error) {
+            res.status(500).send('Internal Server Error');
         }
     }
 
-    registerTopic(topicName) {
-        if (!this.topics.has(topicName)) {
-            const topic = new Topic(topicName);
-            this.topics.set(topicName, topic);
-        }
+    getAlertsForUser(req, res) {
+        const { userId } = req.params;
+        const alerts = alertService.getAlertsForUser(parseInt(userId, 10));
+        res.json(alerts);
     }
 
-    subscribeUserToTopic(userId, topicName) {
-        const user = this.users.get(userId);
-        const topic = this.topics.get(topicName);
-        if (user && topic) {
-            user.subscribeTopic(topic);
-        }
-    }
-
-    sendAlertToTopic(topicName, alert) {
-        const topic = this.topics.get(topicName);
-        if (topic) {
-            this.users.forEach(user => {
-                if (user.topics.has(topic)) {
-                    user.receiveAlert(alert);
-                }
-            });
-        }
-    }
-
-    sendAlertToUser(userId, alert) {
-        const user = this.users.get(userId);
-        if (user) {
-            user.receiveAlert(alert);
-        }
-    }
-
-    getUnreadAlertsForUser(userId) {
-        const user = this.users.get(userId);
-        return user ? user.getUnreadAlerts() : [];
-    }
-
-    getAlertsForTopic(topicName) {
-        const topic = this.topics.get(topicName);
-        if (topic) {
-            const alerts = [];
-            this.users.forEach(user => {
-                if (user.topics.has(topic)) {
-                    user.alerts.forEach(alert => {
-                        if (!alert.isExpired()) {
-                            alerts.push({ alert, userSpecific: alert.userSpecific });
-                        }
-                    });
-                }
-            });
-
-            return alerts.sort((a, b) => b.alert.isUrgent - a.alert.isUrgent || b.alert.timestamp - a.alert.timestamp);
-        }
-        return [];
+    getAlertsForTopic(req, res) {
+        const { topicId } = req.params;
+        const alerts = alertService.getAlertsForTopic(parseInt(topicId, 10));
+        res.json(alerts);
     }
 }
 
-module.exports = AlertController;
+module.exports = new AlertController();
